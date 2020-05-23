@@ -45,7 +45,7 @@ public class Movement : MonoBehaviour
             }
 
             sensitivityX = sensitivityX * mouseSensitivity;
-            Camera.main.transform.Rotate(new Vector3(sensitivityX, 0, 0));
+            //Camera.main.transform.Rotate(new Vector3(sensitivityX, 0, 0));
         }
     }
 

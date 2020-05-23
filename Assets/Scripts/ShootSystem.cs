@@ -6,9 +6,13 @@ public class ShootSystem : MonoBehaviour
 {
     public GameObject[] weaponsPrefabs;
     public GameObject[] projectilesPrefab;
+    public int[] bulletType;
     int indexWeapon = 0;
     public GameObject target;
     public GameObject laserpoint;
+    public bool useOffset = false;
+
+    public float bulletForce = 1000;
 
     void Start()
     {
@@ -58,10 +62,20 @@ public class ShootSystem : MonoBehaviour
             DesactivateWeapons(7);
         }
 
-        if (Input.GetButtonDown("Fire1"))
+        if (bulletType[indexWeapon] == 1)
         {
-            Shoot();
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Shoot();
+            }
         }
+        else
+        {
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                Shoot();
+            }
+        }        
 
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
         {
@@ -75,14 +89,19 @@ public class ShootSystem : MonoBehaviour
     }
 
     void Shoot()
-    {
-        //instancia o objeto e guarda a referencia        
-        //GameObject myprojectile = Instantiate(projectilesPrefab[indexWeapon], target.transform.position + transform.forward, transform.rotation);        
-        //GameObject myprojectile = Instantiate(projectilesPrefab[indexWeapon], target.transform.position, target.transform.rotation);
-        GameObject myprojectile = Instantiate(projectilesPrefab[indexWeapon], new Vector3(transform.position.x, transform.position.y + 0.6f, transform.position.z) + transform.forward, transform.rotation);        
-
-        myprojectile.GetComponent<Rigidbody>().AddForce(transform.forward * 1000);
-        // Destroy
+    {        
+        if (useOffset == false)
+        {
+            GameObject myprojectile = Instantiate(projectilesPrefab[indexWeapon], new Vector3(transform.position.x + 0.5f, transform.position.y + 0.1f, transform.position.z) + transform.forward, transform.rotation);
+            myprojectile.GetComponent<Rigidbody>().AddForce(transform.forward * bulletForce);
+        }
+        else if (useOffset == true)
+        {
+            Vector3 offsetVector = target.transform.position;
+            GameObject myprojectile = Instantiate(projectilesPrefab[indexWeapon], offsetVector + target.transform.forward, target.transform.rotation);            
+            myprojectile.GetComponent<Rigidbody>().AddForce(transform.forward * bulletForce);
+        }
+        weaponsPrefabs[indexWeapon].GetComponent<Animation>().Play();
     }
 
     void DesactivateWeapons(int whichActivate)
