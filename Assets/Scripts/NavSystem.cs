@@ -11,6 +11,7 @@ public class NavSystem : MonoBehaviour
     public GameObject primarySystemObj;
     public PrimarySystem primaryScript;
     public Animator anin;
+    
     void Start()
     {
         anin = GetComponent<Animator>();
@@ -18,7 +19,7 @@ public class NavSystem : MonoBehaviour
         objective = GameObject.FindGameObjectWithTag("Player").transform;
         isAlive = true;        
         primarySystemObj = GameObject.FindGameObjectWithTag("System");
-        //primaryScript = primarySystemObj.GetComponent<PrimarySystem>();
+        primaryScript = primarySystemObj.GetComponent<PrimarySystem>();
     }
 
     // Update is called once per frame
@@ -36,12 +37,12 @@ public class NavSystem : MonoBehaviour
         {
             Debug.Log(collision.gameObject.tag);
             //primaryScript.scoreNumber++;
-            StartCoroutine(Deathtimer());                       
+            //StartCoroutine(Deathtimer());                       
         }
         else if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Game Over");
-            //primaryScript.GameOver();
+            primaryScript.GameOver();
         }
     }
 
@@ -68,18 +69,28 @@ public class NavSystem : MonoBehaviour
             isAlive = false;
         }
     }
-    IEnumerator Deathtimer()
+    public IEnumerator Deathtimer()
     {
         isAlive = false;
         navAgent.ResetPath();
-        //this.GetComponent<ParticleSystem>().Play();
-        yield return new WaitForSeconds(0.2f);
+        this.GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(0.1f);
         Destroy(this.gameObject);
+        Debug.Log("Death Timer on");
     }
 
     IEnumerator Idletimer()
     {
         yield return new WaitForSeconds(1f);
         isAlive = true;
+    }
+
+    public void GetAttacked()
+    {
+        Debug.Log("Foi Atacado");
+        // myRb.AddForce(-transform.forward * forceSpeed, ForceMode.Impulse);
+        this.gameObject.GetComponent<Rigidbody>().AddForce(-this.transform.forward * 100.0f, ForceMode.Impulse);
+        StartCoroutine(Idletimer());
+        StartCoroutine(Deathtimer());
     }
 }

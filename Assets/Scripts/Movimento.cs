@@ -9,13 +9,21 @@ public class Movimento : MonoBehaviour
     public Rigidbody rigid;
     public Animator anin;
     public bool jump = false;
-    // Use this for initialization
+    //public NavSystem navEnemyScript;
+    
+    public MelleAtackSystem swordScript;
+    public GameObject spellObj;
+    public GameObject spellOrigin;
+
+    private bool canCastAgain = true;
+
+    public AudioSource stepSound;
+    
     void Start()
     {
         cam = Camera.main;
     }
 
-    // Update is called once per frame
     void Update()
     {
         bool spell = Input.GetKeyDown(KeyCode.Mouse1);
@@ -26,14 +34,14 @@ public class Movimento : MonoBehaviour
         inputy = Input.GetAxis("Vertical");
 
         if (firing)
-        {
-            Debug.Log("uiui");
+        {            
             anin.SetTrigger("attacking");
+            swordScript.AttackMade();
         }
 
         if (spell)
-        {
-            anin.SetTrigger("spellcasting");
+        {            
+            CastingSpell();
         }
 
         if (jumping && !jump)
@@ -47,12 +55,20 @@ public class Movimento : MonoBehaviour
         {
             anin.SetBool("run",true);
             Rotation();
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                anin.SetBool("running", true);
+            }
+            else
+            {
+                anin.SetBool("running", false);
+            }
         }
         else
         {
+            
             anin.SetBool("run", false);
-            transform.rotation.Normalize();
-            //Quaternion rotation = transform.rotation;
+            transform.rotation.Normalize();            
         }
     }
 
@@ -72,10 +88,18 @@ public class Movimento : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), rotationSpeed);
     }
 
+    void CastingSpell()
+    {
+        if (canCastAgain == true)
+        {
+            anin.SetTrigger("spellcasting");
+            StartCoroutine(CastingTimer());
+        }        
+    }
+
     void OnCollisionEnter (Collision collision)
     {
-        StartCoroutine("Jumptimer");
-        
+        StartCoroutine("Jumptimer");        
     }
 
     IEnumerator Jumptimer()
@@ -84,5 +108,20 @@ public class Movimento : MonoBehaviour
         rigid.velocity = Vector3.zero;
         yield return new WaitForSeconds(0.5f);
         jump = false;     
+    }    
+
+    IEnumerator CastingTimer()
+    {
+        canCastAgain = false;
+        yield return new WaitForSecondsRealtime(0.5f);
+        GameObject tempSpell = Instantiate(spellObj, spellOrigin.transform.position, Quaternion.Euler(Vector3.zero));
+        tempSpell.GetComponent<Rigidbody>().AddForce(this.transform.forward * 2000.0f, ForceMode.Force);
+        yield return new WaitForSecondsRealtime(2.5f);
+        canCastAgain = true;
+    }
+
+    public void PlayStep()
+    {
+        stepSound.Play();
     }
 }
