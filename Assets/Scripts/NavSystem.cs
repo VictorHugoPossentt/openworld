@@ -20,6 +20,7 @@ public class NavSystem : MonoBehaviour
         isAlive = true;        
         primarySystemObj = GameObject.FindGameObjectWithTag("System");
         primaryScript = primarySystemObj.GetComponent<PrimarySystem>();
+        StartCoroutine(ManualCheck());
     }
 
     // Update is called once per frame
@@ -35,14 +36,12 @@ public class NavSystem : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            Debug.Log(collision.gameObject.tag);
-            //primaryScript.scoreNumber++;
-            //StartCoroutine(Deathtimer());                       
+            Debug.Log(collision.gameObject.tag);                                
         }
         else if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Game Over");
-            primaryScript.GameOver();
+            Debug.Log("Game Over");            
+            primaryScript.CalculateLife(10, true, false);
         }
     }
 
@@ -52,7 +51,7 @@ public class NavSystem : MonoBehaviour
         {
             if (isAlive == true)
             {
-                navAgent.SetDestination(objective.position);
+                MakeManualCheck();
             }            
         }
     }
@@ -75,8 +74,7 @@ public class NavSystem : MonoBehaviour
         navAgent.ResetPath();
         this.GetComponent<ParticleSystem>().Play();
         yield return new WaitForSeconds(0.1f);
-        Destroy(this.gameObject);
-        Debug.Log("Death Timer on");
+        Destroy(this.gameObject);        
     }
 
     IEnumerator Idletimer()
@@ -85,12 +83,32 @@ public class NavSystem : MonoBehaviour
         isAlive = true;
     }
 
+    IEnumerator ManualCheck()
+    {
+        while (true)
+        {
+            yield return new WaitForSecondsRealtime(2.0f);
+            MakeManualCheck();
+        }
+    }
+
     public void GetAttacked()
     {
-        Debug.Log("Foi Atacado");
-        // myRb.AddForce(-transform.forward * forceSpeed, ForceMode.Impulse);
+        Debug.Log("Foi Atacado");        
         this.gameObject.GetComponent<Rigidbody>().AddForce(-this.transform.forward * 100.0f, ForceMode.Impulse);
         StartCoroutine(Idletimer());
         StartCoroutine(Deathtimer());
     }
+
+    void MakeManualCheck()
+    {
+        if (Vector3.Distance(objective.position, this.transform.position) < 25.0f)
+        {
+            navAgent.SetDestination(objective.position);
+        }
+        else
+        {
+            navAgent.ResetPath();
+        }
+    }   
 }

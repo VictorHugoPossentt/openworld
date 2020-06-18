@@ -8,6 +8,8 @@ TagManager:
   - Bullet
   - System
   - Inimigo
+  - Lava
+  - MagicDoor
   layers:
   - Default
   - TransparentFX
